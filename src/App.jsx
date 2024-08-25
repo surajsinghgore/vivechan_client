@@ -1,11 +1,12 @@
 import { RouterProvider } from "react-router-dom";
-import { router } from "./Router/router";
 import { Toaster } from "react-hot-toast";
-function App({ children }) {
+import { router } from "./Router/router";
+
+function App() {
   return (
     <>
       <Toaster />
-      <RouterProvider router={router}> {children}</RouterProvider>
+      <RouterProvider router={router} />
     </>
   );
 }

@@ -1,50 +1,41 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import { getLocalStorage } from "../../utils/LocalStorageUtils";
-import DefaultDashboardLayout from "../Layout/DashboardLayout";
-import Sidebar from "../components/Sidebar";
-import Login from "../page/Login";
-import Signup from "../page/Singup";
+import { createBrowserRouter } from "react-router-dom";
+import DefaultDashboardLayout from "../Layout/DefaultDashboardLayout";
 import ChatWindow from "../components/ChatWindow";
-import RootFunction from "./RootFunction";
-
-const LoginProtected = ({ children }) => {
-  const token = getLocalStorage("token");
-  return token ? <Navigate to="/dashboard" replace /> : children;
-};
-
-const DashboardProtected = ({ children }) => {
-  const token = getLocalStorage("token");
-  return token ? <DefaultDashboardLayout>{children}</DefaultDashboardLayout> : <Navigate to="/login" replace />;
-};
+import LoginPage from "../page/Login";
+import SignupPage from "../page/SignupPage";
+import LoginProtected from "../Layout/LoginProtected";
+import DashboardProtected from "../Layout/DashboardProtected";
+import Root from "./Root";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <RootFunction />,
+    element: <Root />,
+  },
+  {
+    path: "/login",
+    element: (
+      <LoginProtected>
+        <LoginPage />
+      </LoginProtected>
+    ),
+  },
+  {
+    path: "/signup",
+    element: (
+      <LoginProtected>
+        <SignupPage />
+      </LoginProtected>
+    ),
   },
   {
     path: "/dashboard",
     element: (
       <DashboardProtected>
-        <Sidebar />
-        <ChatWindow />
+        <DefaultDashboardLayout>
+          <ChatWindow />
+        </DefaultDashboardLayout>
       </DashboardProtected>
-    ),
-  },
-  {
-    path: "login",
-    element: (
-      <LoginProtected>
-        <Login />
-      </LoginProtected>
-    ),
-  },
-  {
-    path: "signup",
-    element: (
-      <LoginProtected>
-        <Signup />
-      </LoginProtected>
     ),
   },
 ]);

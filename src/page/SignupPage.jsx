@@ -7,7 +7,7 @@ import { toast } from "react-hot-toast";
 import TopLoadingBar from "react-top-loading-bar";
 import { Link, useNavigate } from "react-router-dom";
 
-function Signup() {
+function SignupPage() {
   const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -236,4 +236,4 @@ function Signup() {
   );
 }
 
-export default Signup;
+export default SignupPage;

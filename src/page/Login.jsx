@@ -1,67 +1,65 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { validateLogin } from "../../utils/validation/FormValidation";
 import { LoginApi } from "../../utils/services/authServices";
 import { toast } from "react-hot-toast";
-import TopLoadingBar from "react-top-loading-bar";
 import { Link, useNavigate } from "react-router-dom";
+import TopLoadingBar from "react-top-loading-bar";
+import { setLocalStorage } from "../../utils/LocalStorageUtils";
 
-function Login() {
+function LoginPage() {
   const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
+  const handleRegister = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setProgress(10);
 
-    reset,
-  } = useForm({
-    resolver: yupResolver(validateLogin),
-  });
+  try {
+    const res = await fetch("http://localhost:5000/api/v1/user/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+    });
 
-  const handleRegister = async (data) => {
-    console.log(data);
+    const data = await res.json();
 
-    setLoading(true);
-    setProgress(10);
-
-    try {
-      const res = await LoginApi(
-        { username: data.emailOrUsername, password: data.password },
-        {
-          onUploadProgress: (event) => {
-            if (event.lengthComputable) {
-              const percentCompleted = Math.round((event.loaded * 100) / event.total);
-              let stage = Math.min(Math.floor(percentCompleted / 20) * 20, 100);
-              if (stage > progress) {
-                setProgress(stage);
-              }
-            }
-          },
-        }
-      );
-
-      if (res) {
-        toast.success("Login successful!");
-        reset();
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Login failed");
-    } finally {
-      setProgress(100);
-      setLoading(false);
+    if (res.ok) {
+      setLocalStorage('token',data.data.token)
+      toast.success("Login successful!");
+      
+      setTimeout(() => {
+        navigate("/dashboard");
+        
+      }, 2000);
+    } else {
+      // Show error message based on the response
+      toast.error(data.message || "Login failed");
     }
-  };
+  } catch (error) {
+    // Handle network or other errors
+    console.error("An error occurred:", error);
+    toast.error("An unexpected error occurred");
+  } finally {
+    setProgress(100);
+    setLoading(false);
+  }
+};
+
   return (
     <div className="flex w-[98.8vw] py-4 items-center justify-center min-h-screen bg-gray-100 overflow-x-hidden">
-      <TopLoadingBar progress={progress} onLoaderFinished={() => setProgress(0)} color="#3498db" height={3} />
+        <TopLoadingBar progress={progress} onLoaderFinished={() => setProgress(0)} color="#3498db" height={3} />
       <div className="w-full my-2 max-w-lg p-8 space-y-8 bg-white shadow-lg rounded-lg">
         <h2 className="text-2xl font-bold text-center">Login In</h2>
 
-        <form className="space-y-6" onSubmit={handleSubmit(handleRegister)}>
+        <form className="space-y-6" onSubmit={handleRegister}>
           <div>
             <label htmlFor="emailOrUsername" className="block text-sm font-medium text-gray-700">
               Username / Email
@@ -70,11 +68,11 @@ function Login() {
               id="emailOrUsername"
               name="emailOrUsername"
               type="text"
-              {...register("emailOrUsername")}
-              className={`w-full p-2 mt-1 border rounded-md focus:outline-none focus:ring focus:border-blue-300 ${errors.emailOrUsername ? "border-red-500" : ""}`}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className={`w-full p-2 mt-1 border rounded-md focus:outline-none focus:ring focus:border-blue-300 `}
               placeholder="Enter your username  or email"
             />
-            {errors.emailOrUsername && <p className="text-red-500 text-sm">{errors.emailOrUsername.message}</p>}
           </div>
 
           <div>
@@ -85,11 +83,11 @@ function Login() {
               id="password"
               name="password"
               type="password"
-              {...register("password")}
-              className={`w-full p-2 mt-1 border rounded-md focus:outline-none focus:ring focus:border-blue-300 ${errors.password ? "border-red-500" : ""}`}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className={`w-full p-2 mt-1 border rounded-md focus:outline-none focus:ring focus:border-blue-300 `}
               placeholder="Enter your password"
             />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
           </div>
           <button
             type="submit"
@@ -110,4 +108,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default LoginPage;
