@@ -82,7 +82,7 @@ function SignupPage() {
       });
 
       if (res) {
-        toast.success("Registration successful!");
+        toast.success("Registration successfully");
         reset();
         setProfileImage(null);
         setPreview(null);

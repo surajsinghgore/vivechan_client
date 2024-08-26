@@ -34,7 +34,7 @@ function LoginPage() {
     if (res.ok) {
       setLocalStorage('token',data.data.token)
       setLocalStorage('user',data.data.user)
-      toast.success("Login successful!");
+      toast.success("Login successfully");
       
       setTimeout(() => {
         navigate("/dashboard");
