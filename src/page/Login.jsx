@@ -33,6 +33,7 @@ function LoginPage() {
 
     if (res.ok) {
       setLocalStorage('token',data.data.token)
+      setLocalStorage('user',data.data.user)
       toast.success("Login successful!");
       
       setTimeout(() => {
@@ -94,7 +95,7 @@ function LoginPage() {
             className={`w-full py-2 mt-4 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
             disabled={loading}
           >
-            {loading ? "Logging..." : "Login In"}
+            {loading ? "Logging..." : "Log In"}
           </button>
         </form>
         <p className="text-sm text-center text-gray-600">

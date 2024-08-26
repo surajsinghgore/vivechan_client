@@ -4,7 +4,7 @@ import { getLocalStorage } from "../../utils/LocalStorageUtils";
 
 const DashboardProtected = ({ children }) => {
   const token = getLocalStorage("token");
-  return token ? children : <Navigate to="/dashboard" />;
+  return token ? children : <Navigate to="/login" />;
 };
 
 export default DashboardProtected;
