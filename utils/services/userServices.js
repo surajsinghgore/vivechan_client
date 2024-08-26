@@ -9,6 +9,13 @@ const GetAllUserApi = async () => {
     toast.error(error.response.data.message);
   }
 };
+const GetUserByApi = async (id) => {
+  try {
+    const response = await axiosInstance.get(`/v1/user/getUserById/${id}`);
+    return response.data;
+  } catch (error) {
+    toast.error(error.response.data.message);
+  }
+};
 
-
-export { GetAllUserApi };
+export { GetUserByApi, GetAllUserApi };
