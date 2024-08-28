@@ -25,21 +25,19 @@ function ChatWindow() {
   // Initialize socket connection
   useEffect(() => {
     const socketInstance = io("http://localhost:5000");
-
     setSocket(socketInstance);
 
     socketInstance.on("connect", () => {
-      console.log("Connected to socket server");
+      const userId = getLocalStorage("user")?._id;
+      socketInstance.emit("assignUserId", userId);
 
-      // Emit an event when user connects
-      socketInstance.emit("addUser", { userId: getLocalStorage("current") });
-    });
-
-    socketInstance.on("message", (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
-    socketInstance.on("test", (message) => {
-     console.log(message)
+      // Receive message from other users
+      socketInstance.on("sendMessageReceiver", ({ message, senderId }) => {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { message, senderId, received: true }, 
+        ]);
+      });
     });
 
     socketInstance.on("disconnect", () => {
@@ -49,7 +47,7 @@ function ChatWindow() {
     // Clean up socket connection on component unmount
     return () => {
       socketInstance.off("connect");
-      socketInstance.off("message");
+      socketInstance.off("sendMessageReceiver");
       socketInstance.off("disconnect");
       socketInstance.disconnect();
     };
@@ -59,6 +57,27 @@ function ChatWindow() {
   useEffect(() => {
     fetchUserById();
   }, []);
+
+  // Handle sending messages
+  const handleSendMessage = (messageText) => {
+    const senderId = getLocalStorage("user")?._id;
+    const receiverId = getLocalStorage("current"); 
+
+    if (socket && messageText) {
+      // Emit the message to the server
+      socket.emit("sendMessagePersonal", {
+        receiverId,
+        message: messageText,
+        senderId,
+      });
+
+      // Add the sent message to the state
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { message: messageText, senderId, received: false }, // Mark the message as sent
+      ]);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col bg-white">
@@ -84,17 +103,17 @@ function ChatWindow() {
       {/* Messages */}
       <div className="flex-1 p-4 space-y-4 overflow-y-auto">
         {messages.map((msg, index) => (
-          <div key={index} className="flex items-start space-x-4">
-            <img src="https://i.pravatar.cc/40?img=4" alt="Avatar" className="w-8 h-8 rounded-full" />
-            <div className="bg-gray-100 p-4 rounded-lg">
-              <p>{msg.content}</p>
+          <div key={index} className={`flex items-start space-x-4 ${msg.received ? 'flex-row' : 'flex-row-reverse'}`}>
+            <img src={userData?.profile} alt="Avatar" className="w-8 h-8 rounded-full" />
+            <div className={`p-4 rounded-lg ${msg.received ? 'bg-gray-100' : 'bg-blue-500 text-white'}`}>
+              <p>{msg.message}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Message Input */}
-      <MessageInput socket={socket} />
+      <MessageInput onSendMessage={handleSendMessage} />
     </div>
   );
 }
